@@ -30,23 +30,25 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('FocusNFlow')),
+      appBar: AppBar(title: const Text('')),
       body: Center(
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                'Welcome to FocusNFlow!',
+                'Welcome to FocusNFlow GSU!',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const Text(
+                "Study better by collaborating with your peers! Find available study groups that align with your workload and meet with members."
               ),
               const SizedBox(height: 16),
 
               // Mini map
-
               SizedBox(
-                height: 200,
-                width: MediaQuery.of(context).size.width * 0.9, // responsive width
+                height: 400,
+                width: 400,
                 child: StreamBuilder<QuerySnapshot>(
                   stream: studyRoomsRef.snapshots(),
                   builder: (context, snapshot) {
