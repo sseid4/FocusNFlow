@@ -36,12 +36,31 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                'Welcome to FocusNFlow GSU!',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                Icon(
+                  Icons.school,
+                  color: Colors.deepPurple,
+                  size: 32,
+                ),
+                const Text(
+                  '  Welcome to FocusNFlow GSU!',
+                  style: TextStyle(
+                    fontSize: 24, 
+                    fontWeight: FontWeight.bold,
+                    
+                    ),
+                  ),
+                ],
               ),
               const Text(
-                "Study better by collaborating with your peers! Find available study groups that align with your workload and meet with members."
+                "Study better by collaborating with your peers! Find available study groups that align with your workload and meet with members.",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color.fromARGB(255, 161, 161, 161),
+                  height: 1.5,
+                )
               ),
               const SizedBox(height: 16),
 
