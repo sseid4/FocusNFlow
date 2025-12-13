@@ -3,12 +3,16 @@ import 'package:focusnflow/screens/home/home_screen.dart';
 import 'package:focusnflow/screens/map/study_map_screen.dart';
 import 'package:focusnflow/screens/groups/study_groups_screen.dart';
 import 'package:focusnflow/screens/profile/profile_screen.dart';
+import 'package:focusnflow/screens/profile/course_management_screen.dart';
+import 'package:focusnflow/screens/profile/personalized_schedule_screen.dart';
 
 class AppRoutes {
   static const String home = '/';
   static const String map = '/map';
   static const String groups = '/groups';
   static const String profile = '/profile';
+  static const String courseManagement = '/course-management';
+  static const String personalizedSchedule = '/personalized-schedule';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -20,6 +24,10 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const StudyGroupsScreen());
       case profile:
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
+      case courseManagement:
+        return MaterialPageRoute(builder: (_) => const CourseManagementScreen());
+      case personalizedSchedule:
+        return MaterialPageRoute(builder: (_) => const PersonalizedScheduleScreen());
       default:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
     }

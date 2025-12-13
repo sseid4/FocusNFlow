@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:focusnflow/services/auth_service.dart';
+import 'package:focusnflow/screens/profile/analytics_dashboard_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -46,6 +47,66 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
               const SizedBox(height: 48),
+
+              // Course Management button
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/course-management');
+                },
+                icon: const Icon(Icons.school),
+                label: const Text('My Courses'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF8B5CF6),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Study Schedule button
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/personalized-schedule');
+                },
+                icon: const Icon(Icons.calendar_today),
+                label: const Text('Study Schedule'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Analytics button
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const AnalyticsDashboardScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.analytics),
+                label: const Text('View Analytics'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6366F1),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
 
               // Sign out button
               ElevatedButton.icon(
