@@ -115,7 +115,7 @@ workloadScore = credits × difficultyMultiplier
 
 - **Primary Color**: #0055B8 (GSU Blue)
 - **Secondary Colors**: Purple, Green, Gold, Indigo for UI elements
-- **Motto**: "Eagles Rising to Success"
+- **Motto**: "Panther Rising to Success"
 
 ## 📱 Screens
 
@@ -186,28 +186,11 @@ workloadScore = credits × difficultyMultiplier
 4. Push to your branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
 ## 👥 Team
-
-**FocusNFlow** - Georgia State University Senior Capstone Project
-
-### Contributors
-- Siyam Eid (Lead Developer)
+- Emma Brown
+- Siyam Seid
 
 ## 🙏 Acknowledgments
-
-- Georgia State University - Panthers Rising to Success 🐾
 - Firebase for backend infrastructure
 - Flutter community for excellent tools and documentation
 - OpenStreetMap for map data
-
-## 📧 Contact
-
-For questions or issues, please reach out or open an issue on GitHub.
-
----
-
-**Made with ❤️ for GSU Panthers | Eagles Rising to Success 🦅**
