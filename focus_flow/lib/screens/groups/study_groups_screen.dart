@@ -313,9 +313,7 @@ class _StudyGroupsScreenState extends State<StudyGroupsScreen> {
   void _openPomodoro(BuildContext context, StudyGroup group) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => PomodoroScreen(group: group),
-      ),
+      MaterialPageRoute(builder: (context) => PomodoroScreen(group: group)),
     );
   }
 }

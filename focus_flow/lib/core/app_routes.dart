@@ -29,9 +29,13 @@ class AppRoutes {
       case profile:
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
       case courseManagement:
-        return MaterialPageRoute(builder: (_) => const CourseManagementScreen());
+        return MaterialPageRoute(
+          builder: (_) => const CourseManagementScreen(),
+        );
       case personalizedSchedule:
-        return MaterialPageRoute(builder: (_) => const PersonalizedScheduleScreen());
+        return MaterialPageRoute(
+          builder: (_) => const PersonalizedScheduleScreen(),
+        );
       default:
         return MaterialPageRoute(builder: (_) => const AuthGate());
     }

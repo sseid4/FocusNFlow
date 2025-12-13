@@ -90,8 +90,7 @@ class ProfileScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          const AnalyticsDashboardScreen(),
+                      builder: (context) => const AnalyticsDashboardScreen(),
                     ),
                   );
                 },

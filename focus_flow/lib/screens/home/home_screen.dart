@@ -49,13 +49,14 @@ class _HomeScreenState extends State<HomeScreen> {
       ]);
 
       // Get upcoming assignments (next 7 days)
-      final upcomingAssignments = (assignments as List)
-          .where((a) =>
-              a.daysUntilDue > 0 &&
-              a.daysUntilDue <= 7 &&
-              !a.isCompleted)
-          .toList()
-        ..sort((a, b) => a.daysUntilDue.compareTo(b.daysUntilDue));
+      final upcomingAssignments =
+          (assignments as List)
+              .where(
+                (a) =>
+                    a.daysUntilDue > 0 && a.daysUntilDue <= 7 && !a.isCompleted,
+              )
+              .toList()
+            ..sort((a, b) => a.daysUntilDue.compareTo(b.daysUntilDue));
 
       return {
         'patterns': patterns,
@@ -64,13 +65,10 @@ class _HomeScreenState extends State<HomeScreen> {
         'courses': courses,
         'assignments': assignments,
         'upcomingAssignments': upcomingAssignments.take(3).toList(),
-        'userName':
-            user.email?.split('@').first.toUpperCase() ?? 'STUDENT',
+        'userName': user.email?.split('@').first.toUpperCase() ?? 'STUDENT',
       };
     } catch (e) {
-      return {
-        'error': e.toString(),
-      };
+      return {'error': e.toString()};
     }
   }
 
@@ -78,7 +76,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('FocusNFlow', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'FocusNFlow',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         elevation: 0,
         backgroundColor: const Color(0xFF0055B8), // GSU Blue
         actions: [
@@ -87,10 +88,10 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Center(
               child: Text(
                 'Go Panthers! 🐾',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -118,7 +119,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [Color(0xFF0055B8), Color(0xFF003D7A)], // GSU Blue gradient
+                      colors: [
+                        Color(0xFF0055B8),
+                        Color(0xFF003D7A),
+                      ], // GSU Blue gradient
                     ),
                   ),
                   padding: const EdgeInsets.all(24),
@@ -228,8 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               icon: Icons.location_on,
                               label: 'Find Rooms',
                               color: const Color(0xFF10B981),
-                              onTap: () =>
-                                  Navigator.pushNamed(context, '/map'),
+                              onTap: () => Navigator.pushNamed(context, '/map'),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -252,8 +255,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               icon: Icons.schedule,
                               label: 'My Schedule',
                               color: const Color(0xFFF59E0B),
-                              onTap: () =>
-                                  Navigator.pushNamed(context, '/personalized-schedule'),
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                '/personalized-schedule',
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -347,8 +352,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                         height: 40,
                                         child: GestureDetector(
                                           onTap: () {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
                                               SnackBar(
                                                 content: Text(
                                                   'Study Room Available',
@@ -428,10 +434,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 8),
                       Text(
                         'Use the Pomodoro Technique: Study for 25 minutes, then take a 5-minute break. After 4 cycles, take a longer 15-30 minute break. This boosts focus and prevents burnout!',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[700],
-                        ),
+                        style: TextStyle(fontSize: 13, color: Colors.grey[700]),
                       ),
                     ],
                   ),
@@ -454,10 +457,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       Text(
                         'Your success is our mission',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey[500],
-                        ),
+                        style: TextStyle(fontSize: 11, color: Colors.grey[500]),
                       ),
                     ],
                   ),
@@ -497,10 +497,7 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 11,
-            color: Colors.white.withOpacity(0.8),
-          ),
+          style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.8)),
         ),
       ],
     );
@@ -562,8 +559,8 @@ class _HomeScreenState extends State<HomeScreen> {
             color: isUrgent
                 ? Colors.red
                 : isDueSoon
-                    ? Colors.orange
-                    : Colors.green,
+                ? Colors.orange
+                : Colors.green,
           ),
         ),
         borderRadius: BorderRadius.circular(8),
@@ -587,16 +584,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: isUrgent
                       ? Colors.red[100]
                       : isDueSoon
-                          ? Colors.orange[100]
-                          : Colors.green[100],
+                      ? Colors.orange[100]
+                      : Colors.green[100],
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -607,8 +601,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: isUrgent
                         ? Colors.red[700]
                         : isDueSoon
-                            ? Colors.orange[700]
-                            : Colors.green[700],
+                        ? Colors.orange[700]
+                        : Colors.green[700],
                   ),
                 ),
               ),
