@@ -18,7 +18,7 @@ class _AppShellState extends State<AppShell> {
     const HomeScreen(),
     const StudyMapScreen(),
     const StudyGroupsScreen(),
-    const ProfileScreen(),
+    //added profile button to the top right
   ];
 
   void _onItemTapped(int index) {
@@ -27,9 +27,25 @@ class _AppShellState extends State<AppShell> {
     });
   }
 
+  void _openProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ProfileScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Focus n Flow'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: _openProfile,
+          ),
+        ],
+      ),
       body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
@@ -39,7 +55,7 @@ class _AppShellState extends State<AppShell> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
           BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Groups'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        
         ],
       ),
     );
