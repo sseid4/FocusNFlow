@@ -78,24 +78,11 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text(
           'FocusNFlow',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         elevation: 0,
         backgroundColor: const Color(0xFF0055B8), // GSU Blue
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Center(
-              child: Text(
-                'Go Panthers! 🐾',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
+        
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _homeDataFuture,
@@ -139,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Georgia State University - Eagles Rising to Success',
+                        'Georgia State University - Go Panthers! 🐾',
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.white.withOpacity(0.9),
