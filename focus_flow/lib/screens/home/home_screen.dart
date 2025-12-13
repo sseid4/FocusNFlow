@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:focusnflow/services/cognitive_load_analyzer.dart';
 import 'package:focusnflow/services/course_management_service.dart';
 
@@ -264,6 +267,118 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                         ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Mini Study Rooms Map
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Nearby Study Rooms 📍',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        height: 280,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey[300]!),
+                        ),
+                        child: StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('studyRooms')
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError) {
+                              return const Center(
+                                child: Text('Error loading map'),
+                              );
+                            }
+                            if (!snapshot.hasData) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+
+                            final rooms = snapshot.data!.docs;
+                            if (rooms.isEmpty) {
+                              return Center(
+                                child: Text(
+                                  'No study rooms available',
+                                  style: TextStyle(color: Colors.grey[600]),
+                                ),
+                              );
+                            }
+
+                            // Convert Firestore documents to LatLng markers
+                            final List<LatLng> locations = rooms.map((doc) {
+                              final data = doc.data() as Map<String, dynamic>;
+                              final lat = (data['latitude'] ?? 0.0).toDouble();
+                              final lng = (data['longitude'] ?? 0.0).toDouble();
+                              return LatLng(lat, lng);
+                            }).toList();
+
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: FlutterMap(
+                                options: MapOptions(
+                                  initialCenter: locations[0],
+                                  initialZoom: 15,
+                                ),
+                                children: [
+                                  TileLayer(
+                                    urlTemplate:
+                                        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                                    subdomains: const ['a', 'b', 'c'],
+                                  ),
+                                  MarkerLayer(
+                                    markers: locations.map((loc) {
+                                      return Marker(
+                                        point: loc,
+                                        width: 40,
+                                        height: 40,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  'Study Room Available',
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: const Icon(
+                                            Icons.location_on,
+                                            color: Color(0xFF0055B8),
+                                            size: 32,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Tap on a location to see details or navigate to the full map',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
                     ],
                   ),
