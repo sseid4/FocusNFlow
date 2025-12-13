@@ -111,18 +111,18 @@ users/
   {userId}/
     - profile data
     - courses: [courseIds]
-    
+
 courses/
   {courseId}/
     - course info
     - groups: [groupIds]
-    
+
 groups/
   {groupId}/
     - group data
     - members: [userIds]
     - sessions: [sessionIds]
-    
+
 studyRooms/
   {roomId}/
     - room data
@@ -192,7 +192,7 @@ class CognitiveLoadOptimizer {
   - sessionDuration
   - timeOfDay
   - recentBreakPattern
-  
+
   // Output recommendations
   - optimalSessionLength
   - suggestedBreakTiming

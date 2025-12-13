@@ -12,7 +12,7 @@ class StudyMapScreen extends StatefulWidget {
 class _StudyMapScreenState extends State<StudyMapScreen> {
   final _roomService = RoomService();
   late Stream<List<StudyRoom>> _roomsStream;
-  
+
   String _selectedFilter = 'all'; // all, available, full
   List<String> _selectedAmenities = [];
   final List<String> _availableAmenities = ['WiFi', 'Whiteboard', 'Projector', 'Outlets', 'Quiet'];

@@ -3,6 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:focusnflow/models/study_group.dart';
 import 'package:focusnflow/services/group_service.dart';
+import 'package:focusnflow/screens/groups/group_chat_screen.dart' as chat;
+import 'package:focusnflow/screens/groups/session_scheduling_screen.dart';
+import 'package:focusnflow/screens/groups/pomodoro_screen.dart';
 
 class StudyGroupsScreen extends StatefulWidget {
   const StudyGroupsScreen({Key? key}) : super(key: key);
@@ -45,12 +48,7 @@ class _StudyGroupsScreenState extends State<StudyGroupsScreen> {
             ),
           ],
         ),
-        body: TabBarView(
-          children: [
-            _buildMyGroupsTab(),
-            _buildDiscoverTab(),
-          ],
-        ),
+        body: TabBarView(children: [_buildMyGroupsTab(), _buildDiscoverTab()]),
       ),
     );
   }
@@ -78,11 +76,7 @@ class _StudyGroupsScreenState extends State<StudyGroupsScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.group,
-                  size: 64,
-                  color: Colors.grey[400],
-                ),
+                Icon(Icons.group, size: 64, color: Colors.grey[400]),
                 const SizedBox(height: 16),
                 Text(
                   'No groups yet',
@@ -167,8 +161,9 @@ class _StudyGroupsScreenState extends State<StudyGroupsScreen> {
                   if (isAdmin)
                     Chip(
                       label: const Text('Admin'),
-                      backgroundColor:
-                          Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.2),
                       labelStyle: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -183,22 +178,44 @@ class _StudyGroupsScreenState extends State<StudyGroupsScreen> {
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Chip(
                     label: Text('${group.memberCount}/${group.maxMembers}'),
                     avatar: const Icon(Icons.people, size: 18),
                   ),
+                  const SizedBox(height: 12),
                   if (isMyGroup)
-                    ElevatedButton.icon(
-                      onPressed: () => _leaveGroup(context, group),
-                      icon: const Icon(Icons.exit_to_app),
-                      label: const Text('Leave'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                      ),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () => _openChat(context, group),
+                          icon: const Icon(Icons.chat, size: 18),
+                          label: const Text('Chat'),
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: () => _openSessions(context, group),
+                          icon: const Icon(Icons.calendar_today, size: 18),
+                          label: const Text('Sessions'),
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: () => _openPomodoro(context, group),
+                          icon: const Icon(Icons.timer, size: 18),
+                          label: const Text('Timer'),
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: () => _leaveGroup(context, group),
+                          icon: const Icon(Icons.exit_to_app, size: 18),
+                          label: const Text('Leave'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
                 ],
               ),
@@ -274,6 +291,33 @@ class _StudyGroupsScreenState extends State<StudyGroupsScreen> {
       }
     }
   }
+
+  void _openChat(BuildContext context, StudyGroup group) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => chat.GroupChatScreen(group: group),
+      ),
+    );
+  }
+
+  void _openSessions(BuildContext context, StudyGroup group) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SessionSchedulingScreen(group: group),
+      ),
+    );
+  }
+
+  void _openPomodoro(BuildContext context, StudyGroup group) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PomodoroScreen(group: group),
+      ),
+    );
+  }
 }
 
 class _DiscoverGroupsWidget extends StatefulWidget {
@@ -308,11 +352,11 @@ class _DiscoverGroupsWidgetState extends State<_DiscoverGroupsWidget> {
           .collection('groups')
           .where('isPublic', isEqualTo: true)
           .get();
-      
+
       final groups = snapshot.docs
           .map((doc) => StudyGroup.fromJson({...doc.data(), 'id': doc.id}))
           .toList();
-      
+
       // Sort in memory to avoid composite index requirement
       groups.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return groups;
@@ -356,20 +400,20 @@ class _DiscoverGroupsWidgetState extends State<_DiscoverGroupsWidget> {
               // Filter based on search
               if (_searchController.text.isNotEmpty) {
                 groups = groups
-                    .where((group) =>
-                        group.name
-                            .toLowerCase()
-                            .contains(_searchController.text.toLowerCase()) ||
-                        group.courseName
-                            .toLowerCase()
-                            .contains(_searchController.text.toLowerCase()))
+                    .where(
+                      (group) =>
+                          group.name.toLowerCase().contains(
+                            _searchController.text.toLowerCase(),
+                          ) ||
+                          group.courseName.toLowerCase().contains(
+                            _searchController.text.toLowerCase(),
+                          ),
+                    )
                     .toList();
               }
 
               if (groups.isEmpty) {
-                return const Center(
-                  child: Text('No groups found'),
-                );
+                return const Center(child: Text('No groups found'));
               }
 
               return ListView.builder(
@@ -474,7 +518,9 @@ class _DiscoverGroupCardState extends State<_DiscoverGroupCard> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Chip(
-                  label: Text('${widget.group.memberCount}/${widget.group.maxMembers}'),
+                  label: Text(
+                    '${widget.group.memberCount}/${widget.group.maxMembers}',
+                  ),
                   avatar: const Icon(Icons.people, size: 18),
                 ),
                 if (!_isMember)
@@ -486,17 +532,16 @@ class _DiscoverGroupCardState extends State<_DiscoverGroupCard> {
                         ? const SizedBox(
                             height: 20,
                             width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Text('Join'),
                   )
                 else
                   Chip(
                     label: const Text('Member'),
-                    backgroundColor:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.2),
                     labelStyle: TextStyle(
                       color: Theme.of(context).colorScheme.primary,
                     ),
@@ -513,7 +558,10 @@ class _DiscoverGroupCardState extends State<_DiscoverGroupCard> {
     setState(() => _isJoining = true);
 
     try {
-      await widget.groupService.joinGroup(widget.group.id, widget.currentUserId);
+      await widget.groupService.joinGroup(
+        widget.group.id,
+        widget.currentUserId,
+      );
       if (mounted) {
         setState(() => _isMember = true);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -527,10 +575,7 @@ class _DiscoverGroupCardState extends State<_DiscoverGroupCard> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -556,7 +601,6 @@ class _GroupDetailsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: groupService.getGroupMembers(group.id),
       builder: (context, snapshot) {
@@ -710,9 +754,9 @@ class _CreateGroupDialogState extends State<_CreateGroupDialog> {
     if (_nameController.text.isEmpty ||
         _courseController.text.isEmpty ||
         _descriptionController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please fill all fields')));
       return;
     }
 
@@ -740,10 +784,7 @@ class _CreateGroupDialogState extends State<_CreateGroupDialog> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {

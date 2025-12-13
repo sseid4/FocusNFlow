@@ -55,8 +55,10 @@ class RoomService {
       final snapshot = await _firestore.collection(collectionPath).get();
       return snapshot.docs
           .map((doc) => StudyRoom.fromJson({...doc.data(), 'id': doc.id}))
-          .where((room) =>
-              amenities.every((amenity) => room.amenities.contains(amenity)))
+          .where(
+            (room) =>
+                amenities.every((amenity) => room.amenities.contains(amenity)),
+          )
           .toList();
     } catch (e) {
       throw Exception('Failed to fetch rooms by amenities: $e');
@@ -78,19 +80,21 @@ class RoomService {
 
   // Real-time room updates stream
   Stream<List<StudyRoom>> streamAllRooms() {
-    return _firestore.collection(collectionPath).snapshots().map((snapshot) =>
-        snapshot.docs
-            .map((doc) => StudyRoom.fromJson({...doc.data(), 'id': doc.id}))
-            .toList());
+    return _firestore
+        .collection(collectionPath)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => StudyRoom.fromJson({...doc.data(), 'id': doc.id}))
+              .toList(),
+        );
   }
 
   // Real-time single room stream
   Stream<StudyRoom> streamRoomById(String roomId) {
-    return _firestore
-        .collection(collectionPath)
-        .doc(roomId)
-        .snapshots()
-        .map((doc) {
+    return _firestore.collection(collectionPath).doc(roomId).snapshots().map((
+      doc,
+    ) {
       if (!doc.exists) {
         throw Exception('Room not found');
       }
@@ -109,8 +113,10 @@ class RoomService {
           throw Exception('Room not found');
         }
 
-        final room =
-            StudyRoom.fromJson({...roomSnapshot.data()!, 'id': roomSnapshot.id});
+        final room = StudyRoom.fromJson({
+          ...roomSnapshot.data()!,
+          'id': roomSnapshot.id,
+        });
 
         if (!room.hasSpace) {
           throw Exception('Room is full');
@@ -129,11 +135,10 @@ class RoomService {
             .collection(occupancyPath)
             .doc(userId)
             .set({
-          'userId': userId,
-          'checkInTime': DateTime.now().toIso8601String(),
-          'checkOutTime': null,
-        }, SetOptions(merge: true),
-        );
+              'userId': userId,
+              'checkInTime': DateTime.now().toIso8601String(),
+              'checkOutTime': null,
+            }, SetOptions(merge: true));
       });
     } catch (e) {
       throw Exception('Failed to check in: $e');
@@ -151,11 +156,16 @@ class RoomService {
           throw Exception('Room not found');
         }
 
-        final room =
-            StudyRoom.fromJson({...roomSnapshot.data()!, 'id': roomSnapshot.id});
+        final room = StudyRoom.fromJson({
+          ...roomSnapshot.data()!,
+          'id': roomSnapshot.id,
+        });
 
         // Update room occupancy (minimum 0)
-        final newOccupancy = (room.currentOccupancy - 1).clamp(0, room.capacity);
+        final newOccupancy = (room.currentOccupancy - 1).clamp(
+          0,
+          room.capacity,
+        );
 
         transaction.update(roomDoc, {
           'currentOccupancy': newOccupancy,
@@ -168,9 +178,7 @@ class RoomService {
             .doc(roomId)
             .collection(occupancyPath)
             .doc(userId)
-            .update({
-          'checkOutTime': DateTime.now().toIso8601String(),
-        });
+            .update({'checkOutTime': DateTime.now().toIso8601String()});
       });
     } catch (e) {
       throw Exception('Failed to check out: $e');
@@ -179,7 +187,8 @@ class RoomService {
 
   // Get room occupancy history
   Future<List<Map<String, dynamic>>> getRoomOccupancyHistory(
-      String roomId) async {
+    String roomId,
+  ) async {
     try {
       final snapshot = await _firestore
           .collection(collectionPath)
@@ -210,7 +219,9 @@ class RoomService {
   // Create new room (admin function)
   Future<String> createRoom(StudyRoom room) async {
     try {
-      final docRef = await _firestore.collection(collectionPath).add(
+      final docRef = await _firestore
+          .collection(collectionPath)
+          .add(
             room.toJson()..['lastUpdated'] = DateTime.now().toIso8601String(),
           );
       return docRef.id;
@@ -225,6 +236,225 @@ class RoomService {
       await _firestore.collection(collectionPath).doc(roomId).delete();
     } catch (e) {
       throw Exception('Failed to delete room: $e');
+    }
+  }
+
+  // Enhanced: Create check-in session
+  Future<String> createCheckInSession({
+    required String roomId,
+    required String userId,
+    required String userName,
+    String? groupId,
+    Map<String, dynamic>? metadata,
+  }) async {
+    try {
+      final sessionId = _firestore.collection('checkInSessions').doc().id;
+      final now = DateTime.now();
+
+      // Check room capacity in transaction
+      await _firestore.runTransaction((transaction) async {
+        final roomRef = _firestore.collection(collectionPath).doc(roomId);
+        final roomSnapshot = await transaction.get(roomRef);
+
+        if (!roomSnapshot.exists) {
+          throw Exception('Room not found');
+        }
+
+        final room = StudyRoom.fromJson({
+          ...roomSnapshot.data()!,
+          'id': roomSnapshot.id,
+        });
+
+        if (!room.hasSpace) {
+          throw Exception('Room is full');
+        }
+
+        // Create check-in session
+        transaction.set(
+          _firestore.collection('checkInSessions').doc(sessionId),
+          {
+            'id': sessionId,
+            'roomId': roomId,
+            'userId': userId,
+            'userName': userName,
+            'checkInTime': now.toIso8601String(),
+            'checkOutTime': null,
+            'groupId': groupId,
+            'metadata': metadata ?? {},
+            'isActive': true,
+          },
+        );
+
+        // Update room occupancy
+        transaction.update(roomRef, {
+          'currentOccupancy': room.currentOccupancy + 1,
+          'lastUpdated': now.toIso8601String(),
+        });
+
+        // Track active sessions in room
+        transaction.update(
+          roomRef,
+          {
+            'activeSessions': FieldValue.arrayUnion([sessionId])
+          },
+        );
+      });
+
+      return sessionId;
+    } catch (e) {
+      throw Exception('Failed to create check-in session: $e');
+    }
+  }
+
+  // Enhanced: End check-in session
+  Future<void> endCheckInSession(String sessionId, String roomId) async {
+    try {
+      final now = DateTime.now();
+
+      await _firestore.runTransaction((transaction) async {
+        final sessionRef =
+            _firestore.collection('checkInSessions').doc(sessionId);
+        final roomRef = _firestore.collection(collectionPath).doc(roomId);
+
+        final sessionSnapshot = await transaction.get(sessionRef);
+        if (!sessionSnapshot.exists) {
+          throw Exception('Session not found');
+        }
+
+        final roomSnapshot = await transaction.get(roomRef);
+        if (!roomSnapshot.exists) {
+          throw Exception('Room not found');
+        }
+
+        final room = StudyRoom.fromJson({
+          ...roomSnapshot.data()!,
+          'id': roomSnapshot.id,
+        });
+
+        // Update session
+        transaction.update(sessionRef, {
+          'checkOutTime': now.toIso8601String(),
+          'isActive': false,
+        });
+
+        // Update room occupancy
+        final newOccupancy = (room.currentOccupancy - 1).clamp(0, room.capacity);
+        transaction.update(roomRef, {
+          'currentOccupancy': newOccupancy,
+          'lastUpdated': now.toIso8601String(),
+        });
+
+        // Remove from active sessions
+        transaction.update(
+          roomRef,
+          {
+            'activeSessions': FieldValue.arrayRemove([sessionId])
+          },
+        );
+      });
+    } catch (e) {
+      throw Exception('Failed to end check-in session: $e');
+    }
+  }
+
+  // Get active sessions in a room
+  Future<List<Map<String, dynamic>>> getActiveSessionsInRoom(
+    String roomId,
+  ) async {
+    try {
+      final snapshot = await _firestore
+          .collection('checkInSessions')
+          .where('roomId', isEqualTo: roomId)
+          .where('isActive', isEqualTo: true)
+          .get();
+
+      return snapshot.docs.map((doc) => doc.data()).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch active sessions: $e');
+    }
+  }
+
+  // Get user's current check-in
+  Future<Map<String, dynamic>?> getUserCurrentCheckIn(String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('checkInSessions')
+          .where('userId', isEqualTo: userId)
+          .where('isActive', isEqualTo: true)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        return null;
+      }
+      return snapshot.docs.first.data();
+    } catch (e) {
+      throw Exception('Failed to fetch user check-in: $e');
+    }
+  }
+
+  // Get user's check-in history
+  Future<List<Map<String, dynamic>>> getUserCheckInHistory(
+    String userId, {
+    int limit = 20,
+  }) async {
+    try {
+      final snapshot = await _firestore
+          .collection('checkInSessions')
+          .where('userId', isEqualTo: userId)
+          .orderBy('checkInTime', descending: true)
+          .limit(limit)
+          .get();
+
+      return snapshot.docs.map((doc) => doc.data()).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch check-in history: $e');
+    }
+  }
+
+  // Get room statistics
+  Future<Map<String, dynamic>> getRoomStatistics(String roomId) async {
+    try {
+      final today = DateTime.now();
+      final startOfDay =
+          DateTime(today.year, today.month, today.day).toIso8601String();
+
+      final snapshot = await _firestore
+          .collection('checkInSessions')
+          .where('roomId', isEqualTo: roomId)
+          .where('checkInTime', isGreaterThanOrEqualTo: startOfDay)
+          .get();
+
+      final sessions = snapshot.docs.map((doc) => doc.data()).toList();
+
+      int totalCheckIns = sessions.length;
+      final totalUniqueUsers = <String>{};
+      Duration totalStudyTime = Duration.zero;
+
+      for (var session in sessions) {
+        // Count unique users
+        final userId = session['userId'] as String?;
+        if (userId != null) {
+          totalUniqueUsers.add(userId);
+        }
+
+        // Calculate study time
+        final checkInTime = DateTime.parse(session['checkInTime'] as String);
+        final checkOutTime = session['checkOutTime'] != null
+            ? DateTime.parse(session['checkOutTime'] as String)
+            : DateTime.now();
+        totalStudyTime = totalStudyTime + checkOutTime.difference(checkInTime);
+      }
+
+      return {
+        'totalCheckIns': totalCheckIns,
+        'uniqueUsers': totalUniqueUsers.length,
+        'totalStudyTime': totalStudyTime.inMinutes,
+        'averageSessionTime':
+            totalCheckIns > 0 ? totalStudyTime.inMinutes ~/ totalCheckIns : 0,
+      };
+    } catch (e) {
+      throw Exception('Failed to fetch room statistics: $e');
     }
   }
 }

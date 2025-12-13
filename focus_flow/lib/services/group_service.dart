@@ -35,7 +35,7 @@ class GroupService {
       final groups = snapshot.docs
           .map((doc) => StudyGroup.fromJson({...doc.data(), 'id': doc.id}))
           .toList();
-      
+
       // Sort in memory to avoid composite index requirement
       groups.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return groups;
@@ -63,8 +63,10 @@ class GroupService {
   // Get single group details
   Future<StudyGroup> getGroupById(String groupId) async {
     try {
-      final doc =
-          await _firestore.collection(groupsCollection).doc(groupId).get();
+      final doc = await _firestore
+          .collection(groupsCollection)
+          .doc(groupId)
+          .get();
       if (!doc.exists) {
         throw Exception('Group not found');
       }
@@ -76,16 +78,14 @@ class GroupService {
 
   // Stream single group for real-time updates
   Stream<StudyGroup> streamGroupById(String groupId) {
-    return _firestore
-        .collection(groupsCollection)
-        .doc(groupId)
-        .snapshots()
-        .map((doc) {
-      if (!doc.exists) {
-        throw Exception('Group not found');
-      }
-      return StudyGroup.fromJson({...doc.data()!, 'id': doc.id});
-    });
+    return _firestore.collection(groupsCollection).doc(groupId).snapshots().map(
+      (doc) {
+        if (!doc.exists) {
+          throw Exception('Group not found');
+        }
+        return StudyGroup.fromJson({...doc.data()!, 'id': doc.id});
+      },
+    );
   }
 
   // Create new study group
@@ -121,10 +121,11 @@ class GroupService {
           .collection(usersCollection)
           .doc(adminId)
           .update({
-        'groups': FieldValue.arrayUnion([groupRef.id]),
-      }).catchError((_) {
-        // User doc might not exist yet, that's okay
-      });
+            'groups': FieldValue.arrayUnion([groupRef.id]),
+          })
+          .catchError((_) {
+            // User doc might not exist yet, that's okay
+          });
 
       return groupRef.id;
     } catch (e) {
@@ -137,16 +138,17 @@ class GroupService {
     try {
       await _firestore.runTransaction((transaction) async {
         final groupRef = _firestore.collection(groupsCollection).doc(groupId);
-        final userRef =
-            _firestore.collection(usersCollection).doc(userId);
+        final userRef = _firestore.collection(usersCollection).doc(userId);
 
         final groupSnapshot = await transaction.get(groupRef);
         if (!groupSnapshot.exists) {
           throw Exception('Group not found');
         }
 
-        final group =
-            StudyGroup.fromJson({...groupSnapshot.data()!, 'id': groupId});
+        final group = StudyGroup.fromJson({
+          ...groupSnapshot.data()!,
+          'id': groupId,
+        });
 
         // Check if already a member
         if (group.memberIds.contains(userId)) {
@@ -181,16 +183,17 @@ class GroupService {
     try {
       await _firestore.runTransaction((transaction) async {
         final groupRef = _firestore.collection(groupsCollection).doc(groupId);
-        final userRef =
-            _firestore.collection(usersCollection).doc(userId);
+        final userRef = _firestore.collection(usersCollection).doc(userId);
 
         final groupSnapshot = await transaction.get(groupRef);
         if (!groupSnapshot.exists) {
           throw Exception('Group not found');
         }
 
-        final group =
-            StudyGroup.fromJson({...groupSnapshot.data()!, 'id': groupId});
+        final group = StudyGroup.fromJson({
+          ...groupSnapshot.data()!,
+          'id': groupId,
+        });
 
         // Admin cannot leave without transferring ownership
         if (group.adminId == userId && group.memberIds.length > 1) {
@@ -263,11 +266,15 @@ class GroupService {
 
       // Remove group from all members
       for (var memberId in group.memberIds) {
-        await _firestore.collection(usersCollection).doc(memberId).update({
-          'groups': FieldValue.arrayRemove([groupId]),
-        }).catchError((_) {
-          // User doc might not exist
-        });
+        await _firestore
+            .collection(usersCollection)
+            .doc(memberId)
+            .update({
+              'groups': FieldValue.arrayRemove([groupId]),
+            })
+            .catchError((_) {
+              // User doc might not exist
+            });
       }
 
       // Delete group
@@ -317,10 +324,12 @@ class GroupService {
 
       return snapshot.docs
           .map((doc) => StudyGroup.fromJson({...doc.data(), 'id': doc.id}))
-          .where((group) =>
-              group.name.toLowerCase().contains(query.toLowerCase()) ||
-              group.description.toLowerCase().contains(query.toLowerCase()) ||
-              group.courseName.toLowerCase().contains(query.toLowerCase()))
+          .where(
+            (group) =>
+                group.name.toLowerCase().contains(query.toLowerCase()) ||
+                group.description.toLowerCase().contains(query.toLowerCase()) ||
+                group.courseName.toLowerCase().contains(query.toLowerCase()),
+          )
           .toList();
     } catch (e) {
       throw Exception('Failed to search groups: $e');
@@ -344,8 +353,10 @@ class GroupService {
 
       for (var memberId in group.memberIds) {
         try {
-          final userDoc =
-              await _firestore.collection(usersCollection).doc(memberId).get();
+          final userDoc = await _firestore
+              .collection(usersCollection)
+              .doc(memberId)
+              .get();
           if (userDoc.exists) {
             members.add({
               'id': memberId,
