@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:focusnflow/core/app_theme.dart';
+import 'package:focusnflow/core/app_routes.dart';
 import 'package:focusnflow/screens/auth/auth_gate.dart';
 import 'package:focusnflow/services/firebase_seeder.dart';
 import 'firebase_options.dart';
@@ -24,6 +25,7 @@ class MyApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       home: const AuthGate(),
+      onGenerateRoute: AppRoutes.generateRoute,
       debugShowCheckedModeBanner: false,
     );
   }
