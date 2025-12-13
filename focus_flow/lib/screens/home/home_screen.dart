@@ -54,20 +54,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              const Text(
-                "Study better by collaborating with your peers! Find available study groups that align with your workload and meet with members.",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Color.fromARGB(255, 161, 161, 161),
-                  height: 1.5,
-                )
-              ),
+              Text.rich( 
+                  TextSpan(
+                    children: [
+                      TextSpan(text: 'Study smarter with your peers!\n', style: TextStyle(fontSize: 12, ),),
+                      TextSpan(text: 'Find available study groups and meet up!', style: TextStyle(fontSize: 12),),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               const SizedBox(height: 16),
 
               // Mini map
               SizedBox(
-                height: 400,
-                width: 400,
+                height: 300,
+                width: 300,
                 child: StreamBuilder<QuerySnapshot>(
                   stream: studyRoomsRef.snapshots(),
                   builder: (context, snapshot) {
