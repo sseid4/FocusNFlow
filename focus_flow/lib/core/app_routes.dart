@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focusnflow/screens/auth/auth_gate.dart';
 import 'package:focusnflow/screens/home/home_screen.dart';
 import 'package:focusnflow/screens/map/study_map_screen.dart';
 import 'package:focusnflow/screens/groups/study_groups_screen.dart';
@@ -7,7 +8,8 @@ import 'package:focusnflow/screens/profile/course_management_screen.dart';
 import 'package:focusnflow/screens/profile/personalized_schedule_screen.dart';
 
 class AppRoutes {
-  static const String home = '/';
+  static const String auth = '/';
+  static const String home = '/home';
   static const String map = '/map';
   static const String groups = '/groups';
   static const String profile = '/profile';
@@ -16,6 +18,8 @@ class AppRoutes {
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case auth:
+        return MaterialPageRoute(builder: (_) => const AuthGate());
       case home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
       case map:
@@ -29,7 +33,7 @@ class AppRoutes {
       case personalizedSchedule:
         return MaterialPageRoute(builder: (_) => const PersonalizedScheduleScreen());
       default:
-        return MaterialPageRoute(builder: (_) => const HomeScreen());
+        return MaterialPageRoute(builder: (_) => const AuthGate());
     }
   }
 }
