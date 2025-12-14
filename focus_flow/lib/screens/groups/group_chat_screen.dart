@@ -61,6 +61,40 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     });
   }
 
+  void _confirmClearMessages() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear All Messages'),
+        content: const Text(
+            'Are you sure you want to delete all messages in this group? This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await _chatService.clearGroupMessages(widget.group.id);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('All messages cleared')),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Failed to clear messages: $e')),
+                );
+              }
+            },
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,6 +111,14 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
           ],
         ),
         elevation: 0,
+        actions: [
+          if (_currentUser != null && _currentUser!.uid == widget.group.adminId)
+            IconButton(
+              icon: const Icon(Icons.delete_sweep),
+              tooltip: 'Clear all messages',
+              onPressed: () => _confirmClearMessages(),
+            ),
+        ],
       ),
       body: Column(
         children: [
