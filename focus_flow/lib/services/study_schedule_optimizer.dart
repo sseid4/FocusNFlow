@@ -83,6 +83,8 @@ class StudyScheduleOptimizer {
       } catch (_) {
         attention = {
           'optimalSessionDuration': 25,
+          'focusVariability': '0.0',
+          'performanceDegradation': '0.0',
         };
       }
 
