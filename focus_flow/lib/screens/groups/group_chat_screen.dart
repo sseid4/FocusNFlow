@@ -177,113 +177,130 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     final isCurrentUser = message.userId == _currentUser?.uid;
 
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Align(
-                        alignment: isCurrentUser
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                        child: GestureDetector(
-                          onLongPress: isCurrentUser
-                              ? () => _showMessageOptions(context, message)
-                              : null,
-                          child: Container(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width * 0.75,
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Column(
+                        crossAxisAlignment: isCurrentUser
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Sender name - shown for all messages
+                          Padding(
+                            padding: EdgeInsets.only(
+                              left: isCurrentUser ? 0 : 8,
+                              right: isCurrentUser ? 8 : 0,
+                              bottom: 4,
                             ),
-                            decoration: BoxDecoration(
-                              color: isCurrentUser
-                                  ? Theme.of(context).primaryColor
-                                  : Colors.grey[300],
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: isCurrentUser
-                                  ? CrossAxisAlignment.end
-                                  : CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (!isCurrentUser)
-                                  Text(
-                                    message.senderName,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                            child: Text(
+                              isCurrentUser ? 'You' : message.senderName,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                    color: Theme.of(context).primaryColor,
                                   ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  message.content,
-                                  style: TextStyle(
-                                    color: isCurrentUser
-                                        ? Colors.white
-                                        : Colors.black87,
-                                  ),
-                                ),
-                                if (message.isEdited) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'edited',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall
-                                        ?.copyWith(
-                                          fontSize: 10,
-                                          fontStyle: FontStyle.italic,
-                                          color: isCurrentUser
-                                              ? Colors.white70
-                                              : Colors.black54,
-                                        ),
-                                  ),
-                                ],
-                                const SizedBox(height: 4),
-                                Text(
-                                  _formatTime(message.timestamp),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
-                                      ?.copyWith(
-                                        fontSize: 10,
-                                        color: isCurrentUser
-                                            ? Colors.white70
-                                            : Colors.black54,
-                                      ),
-                                ),
-                                // Reactions
-                                if (message.reactions.isNotEmpty) ...[
-                                  const SizedBox(height: 8),
-                                  Wrap(
-                                    spacing: 4,
-                                    children: message.reactions.entries.map((e) {
-                                      return Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[600],
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          '${e.key} ${e.value}',
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ],
-                              ],
                             ),
                           ),
-                        ),
+                          // Message bubble
+                          Align(
+                            alignment: isCurrentUser
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            child: GestureDetector(
+                              onLongPress: isCurrentUser
+                                  ? () => _showMessageOptions(context, message)
+                                  : null,
+                              child: Container(
+                                constraints: BoxConstraints(
+                                  maxWidth: MediaQuery.of(context).size.width * 0.75,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isCurrentUser
+                                      ? Theme.of(context).primaryColor
+                                      : Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: isCurrentUser
+                                      ? CrossAxisAlignment.end
+                                      : CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      message.content,
+                                      style: TextStyle(
+                                        color: isCurrentUser
+                                            ? Colors.white
+                                            : Colors.black87,
+                                      ),
+                                    ),
+                                    if (message.isEdited) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'edited',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              fontSize: 10,
+                                              fontStyle: FontStyle.italic,
+                                              color: isCurrentUser
+                                                  ? Colors.white70
+                                                  : Colors.black54,
+                                            ),
+                                      ),
+                                    ],
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _formatTime(message.timestamp),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall
+                                          ?.copyWith(
+                                            fontSize: 10,
+                                            color: isCurrentUser
+                                                ? Colors.white70
+                                                : Colors.black54,
+                                          ),
+                                    ),
+                                    // Reactions
+                                    if (message.reactions.isNotEmpty) ...[
+                                      const SizedBox(height: 8),
+                                      Wrap(
+                                        spacing: 4,
+                                        children: message.reactions.entries.map((e) {
+                                          return Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey[600],
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: Text(
+                                              '${e.key} ${e.value}',
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   },
