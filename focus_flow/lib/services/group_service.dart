@@ -140,7 +140,10 @@ class GroupService {
         final groupRef = _firestore.collection(groupsCollection).doc(groupId);
         final userRef = _firestore.collection(usersCollection).doc(userId);
 
+        // All reads must happen before writes in a Firestore transaction
         final groupSnapshot = await transaction.get(groupRef);
+        final userSnapshot = await transaction.get(userRef);
+
         if (!groupSnapshot.exists) {
           throw Exception('Group not found');
         }
@@ -165,12 +168,15 @@ class GroupService {
           'memberIds': FieldValue.arrayUnion([userId]),
         });
 
-        // Add group to user's groups
-        final userSnapshot = await transaction.get(userRef);
+        // Add group to user's groups (create doc if missing)
         if (userSnapshot.exists) {
           transaction.update(userRef, {
             'groups': FieldValue.arrayUnion([groupId]),
           });
+        } else {
+          transaction.set(userRef, {
+            'groups': [groupId],
+          }, SetOptions(merge: true));
         }
       });
     } catch (e) {

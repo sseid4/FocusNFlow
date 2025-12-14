@@ -57,19 +57,45 @@ class StudyScheduleOptimizer {
     int daysAhead = 14,
   }) async {
     try {
-      // Get user's cognitive load analysis
-      final patterns = await _cognitiveAnalyzer.analyzeStudyPatterns(
-        userId: userId,
-        daysBack: 30,
-      );
-      final attention = await _cognitiveAnalyzer.analyzeAttentionSpan(
-        userId: userId,
-        daysBack: 30,
-      );
-      final burnout = await _cognitiveAnalyzer.calculateBurnoutRisk(
-        userId: userId,
-        daysBack: 14,
-      );
+      // Get user's cognitive load analysis; fall back to safe defaults if analytics fail (e.g., missing Firestore index)
+      Map<String, dynamic> patterns;
+      Map<String, dynamic> attention;
+      Map<String, dynamic> burnout;
+
+      try {
+        patterns = await _cognitiveAnalyzer.analyzeStudyPatterns(
+          userId: userId,
+          daysBack: 30,
+        );
+      } catch (_) {
+        patterns = {
+          'peakStudyHour': 14,
+          'weekdayVsWeekend': {'weekday': 1, 'weekend': 1},
+          'sessionsPerDay': 3.0,
+        };
+      }
+
+      try {
+        attention = await _cognitiveAnalyzer.analyzeAttentionSpan(
+          userId: userId,
+          daysBack: 30,
+        );
+      } catch (_) {
+        attention = {
+          'optimalSessionDuration': 25,
+        };
+      }
+
+      try {
+        burnout = await _cognitiveAnalyzer.calculateBurnoutRisk(
+          userId: userId,
+          daysBack: 14,
+        );
+      } catch (_) {
+        burnout = {
+          'isBurnoutRisk': false,
+        };
+      }
 
       // Extract user's optimal study parameters
       final optimalSessionLength = attention['optimalSessionDuration'] as int? ?? 25;
@@ -83,12 +109,8 @@ class StudyScheduleOptimizer {
       // Generate study blocks
       final studyBlocks = <StudyBlock>[];
       final now = DateTime.now();
-      final endDate = now.add(Duration(days: daysAhead));
-
       for (var assignment in sortedAssignments) {
-        if (assignment.isCompleted || assignment.dueDate.isAfter(endDate)) {
-          continue;
-        }
+        if (assignment.isCompleted) continue;
 
         final course = courses.firstWhere(
           (c) => c.id == assignment.courseId,
@@ -101,7 +123,9 @@ class StudyScheduleOptimizer {
         
         // Distribute sessions across available days
         final daysUntilDue = assignment.daysUntilDue;
-        final daysToSpread = (daysUntilDue * 0.8).floor().clamp(1, daysAhead);
+        final daysToSpread = (daysUntilDue * 0.8)
+          .floor()
+          .clamp(1, daysAhead);
         
         // If burnout risk, reduce load
         final adjustedSessions = isBurnoutRisk 
@@ -113,10 +137,10 @@ class StudyScheduleOptimizer {
         for (int day = 0; day < daysToSpread && sessionCount < adjustedSessions; day++) {
           final sessionDate = now.add(Duration(days: day));
           
-          // Skip weekends if user doesn't typically study then
+          // Skip weekends only if history shows user avoids them
           final weekdayVsWeekend = patterns['weekdayVsWeekend'] as Map<String, dynamic>?;
-          if (sessionDate.weekday >= 6 && 
-              (weekdayVsWeekend?['weekend'] as int? ?? 0) == 0) {
+          final weekendPreference = weekdayVsWeekend?['weekend'] as int? ?? 1;
+          if (sessionDate.weekday >= 6 && weekendPreference == 0) {
             continue;
           }
 

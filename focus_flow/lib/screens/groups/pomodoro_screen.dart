@@ -18,7 +18,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
   final PomodoroService _pomodoroService = PomodoroService();
   final AuthService _authService = AuthService();
 
-  late Timer _timer;
+  Timer? _timer;
   int _secondsRemaining = 0;
   bool _isRunning = false;
   String _currentPhase = 'work'; // work, short_break, long_break
@@ -84,7 +84,7 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
         });
 
         if (_secondsRemaining <= 0) {
-          _timer.cancel();
+          _timer?.cancel();
           _transitionPhase();
         }
       }
@@ -94,8 +94,8 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
   }
 
   void _pauseTimer() {
-    if (_timer.isActive) {
-      _timer.cancel();
+    if (_timer?.isActive == true) {
+      _timer!.cancel();
     }
     setState(() => _isRunning = false);
 
@@ -177,8 +177,8 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
   }
 
   void _stopSession() async {
-    if (_timer.isActive) {
-      _timer.cancel();
+    if (_timer?.isActive == true) {
+      _timer!.cancel();
     }
 
     if (_currentSessionId != null) {
@@ -275,8 +275,8 @@ class _PomodoroScreenState extends State<PomodoroScreen> {
 
   @override
   void dispose() {
-    if (_timer.isActive) {
-      _timer.cancel();
+    if (_timer?.isActive == true) {
+      _timer!.cancel();
     }
     super.dispose();
   }
