@@ -35,6 +35,22 @@ class _CourseManagementScreenState extends State<CourseManagementScreen>
       }
     });
     _loadData();
+    // Handle deep-link intents to open add dialogs or select tabs
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is Map && args['intent'] is String) {
+        final intent = args['intent'] as String;
+        if (intent == 'addCourse') {
+          _tabController.index = 0;
+          _selectedTabIndex = 0;
+          _showAddCourseDialog();
+        } else if (intent == 'addAssignment') {
+          _tabController.index = 1;
+          _selectedTabIndex = 1;
+          _showAddAssignmentDialog();
+        }
+      }
+    });
   }
 
   @override

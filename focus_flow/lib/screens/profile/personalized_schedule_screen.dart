@@ -257,16 +257,26 @@ class _PersonalizedScheduleScreenState
               children: [
                 Icon(Icons.school, size: 14, color: Colors.grey[600]),
                 const SizedBox(width: 4),
-                Text(
-                  block.courseCode,
-                  style: TextStyle(color: Colors.grey[600]),
+                Expanded(
+                  child: Text(
+                    block.courseCode,
+                    style: TextStyle(color: Colors.grey[600]),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
                 const SizedBox(width: 4),
-                Text(
-                  '${startTime.format(context)} - ${endTime.format(context)}',
-                  style: TextStyle(color: Colors.grey[600]),
+                Flexible(
+                  child: Text(
+                    '${startTime.format(context)} - ${endTime.format(context)}',
+                    style: TextStyle(color: Colors.grey[600]),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                  ),
                 ),
               ],
             ),
@@ -275,9 +285,14 @@ class _PersonalizedScheduleScreenState
               children: [
                 Icon(Icons.timer, size: 14, color: Colors.grey[600]),
                 const SizedBox(width: 4),
-                Text(
-                  '${block.duration} min',
-                  style: TextStyle(color: Colors.grey[600]),
+                Flexible(
+                  child: Text(
+                    '${block.duration} min',
+                    style: TextStyle(color: Colors.grey[600]),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Container(
