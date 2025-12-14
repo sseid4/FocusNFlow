@@ -236,7 +236,19 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
 
     return factors.entries.map((entry) {
       final name = entry.key;
-      final value = double.tryParse(entry.value as String? ?? '0') ?? 0;
+      // Handle both String and double/num types
+      final rawValue = entry.value;
+      late double value;
+      if (rawValue is String) {
+        value = double.tryParse(rawValue) ?? 0;
+      } else if (rawValue is double) {
+        value = rawValue;
+      } else if (rawValue is int) {
+        value = rawValue.toDouble();
+      } else {
+        value = 0;
+      }
+      
       final displayName = name
           .replaceAll(RegExp(r'([A-Z])'), ' \$1')
           .trim()
