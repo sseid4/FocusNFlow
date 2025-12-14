@@ -107,8 +107,28 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
 
   Widget _buildBurnoutCard() {
     final isBurnout = _burnout['isBurnoutRisk'] as bool? ?? false;
-    final riskScore = _burnout['burnoutRiskScore'] as String? ?? '0';
-    final riskLevel = _burnout['riskLevel'] as String? ?? 'Unknown';
+    
+    // Safe type handling for burnoutRiskScore (can be String or double)
+    late String riskScore;
+    final rawBurnoutScore = _burnout['burnoutRiskScore'];
+    if (rawBurnoutScore is String) {
+      riskScore = rawBurnoutScore;
+    } else if (rawBurnoutScore is double) {
+      riskScore = rawBurnoutScore.toStringAsFixed(1);
+    } else if (rawBurnoutScore is int) {
+      riskScore = rawBurnoutScore.toString();
+    } else {
+      riskScore = '0';
+    }
+    
+    // Safe type handling for riskLevel
+    late String riskLevel;
+    final rawRiskLevel = _burnout['riskLevel'];
+    if (rawRiskLevel is String) {
+      riskLevel = rawRiskLevel;
+    } else {
+      riskLevel = 'Unknown';
+    }
 
     Color riskColor = Colors.green;
     IconData riskIcon = Icons.check_circle;
@@ -340,10 +360,33 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen> {
 
   Widget _buildAttentionSpanCard() {
     final focusTime = _attention['averageFocusTime'] as int? ?? 0;
-    final degradation =
-        _attention['performanceDegradation'] as String? ?? '0%';
-    final variability =
-        _attention['focusVariability'] as String? ?? '0%';
+    
+    // Safe type handling for performanceDegradation
+    late String degradation;
+    final rawDegradation = _attention['performanceDegradation'];
+    if (rawDegradation is String) {
+      degradation = rawDegradation;
+    } else if (rawDegradation is double) {
+      degradation = '${(rawDegradation * 100).toStringAsFixed(1)}%';
+    } else if (rawDegradation is int) {
+      degradation = '$rawDegradation%';
+    } else {
+      degradation = '0%';
+    }
+    
+    // Safe type handling for focusVariability
+    late String variability;
+    final rawVariability = _attention['focusVariability'];
+    if (rawVariability is String) {
+      variability = rawVariability;
+    } else if (rawVariability is double) {
+      variability = '${(rawVariability * 100).toStringAsFixed(1)}%';
+    } else if (rawVariability is int) {
+      variability = '$rawVariability%';
+    } else {
+      variability = '0%';
+    }
+    
     final optimal =
         _attention['optimalSessionDuration'] as int? ?? 25;
 

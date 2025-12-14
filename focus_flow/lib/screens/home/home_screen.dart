@@ -255,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               label: 'Analytics',
                               color: const Color(0xFF6366F1),
                               onTap: () =>
-                                  Navigator.pushNamed(context, '/profile'),
+                                  Navigator.pushNamed(context, '/analytics'),
                             ),
                           ),
                         ],

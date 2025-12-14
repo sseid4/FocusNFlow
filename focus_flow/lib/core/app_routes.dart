@@ -4,6 +4,7 @@ import 'package:focusnflow/screens/home/home_screen.dart';
 import 'package:focusnflow/screens/map/study_map_screen.dart';
 import 'package:focusnflow/screens/groups/study_groups_screen.dart';
 import 'package:focusnflow/screens/profile/profile_screen.dart';
+import 'package:focusnflow/screens/profile/analytics_dashboard_screen.dart';
 import 'package:focusnflow/screens/profile/course_management_screen.dart';
 import 'package:focusnflow/screens/profile/personalized_schedule_screen.dart';
 
@@ -13,6 +14,7 @@ class AppRoutes {
   static const String map = '/map';
   static const String groups = '/groups';
   static const String profile = '/profile';
+  static const String analytics = '/analytics';
   static const String courseManagement = '/course-management';
   static const String personalizedSchedule = '/personalized-schedule';
 
@@ -28,6 +30,8 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const StudyGroupsScreen());
       case profile:
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
+      case analytics:
+        return MaterialPageRoute(builder: (_) => const AnalyticsDashboardScreen());
       case courseManagement:
         return MaterialPageRoute(
           builder: (_) => const CourseManagementScreen(),
