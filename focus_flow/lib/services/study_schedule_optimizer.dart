@@ -125,24 +125,32 @@ class StudyScheduleOptimizer {
         
         // Distribute sessions across available days
         final daysUntilDue = assignment.daysUntilDue;
-        final daysToSpread = (daysUntilDue * 0.8)
-          .floor()
-          .clamp(1, daysAhead);
+        // Ensure we have enough days to spread sessions, even for overdue assignments
+        final daysToSpread = daysUntilDue > 0
+            ? (daysUntilDue * 0.8).floor().clamp(3, daysAhead)
+            : daysAhead; // Use full window for overdue assignments
         
         // If burnout risk, reduce load
         final adjustedSessions = isBurnoutRisk 
             ? (sessionsNeeded * 0.7).ceil() 
             : sessionsNeeded;
 
-        // Schedule sessions
+        // Schedule sessions - iterate through more days to account for skipped weekends
         int sessionCount = 0;
-        for (int day = 0; day < daysToSpread && sessionCount < adjustedSessions; day++) {
-          final sessionDate = now.add(Duration(days: day));
+        int dayOffset = 0;
+        while (sessionCount < adjustedSessions && dayOffset < daysToSpread * 2) {
+          final sessionDate = now.add(Duration(days: dayOffset));
+          dayOffset++;
           
           // Skip weekends only if history shows user avoids them
           final weekdayVsWeekend = patterns['weekdayVsWeekend'] as Map<String, dynamic>?;
           final weekendPreference = weekdayVsWeekend?['weekend'] as int? ?? 1;
           if (sessionDate.weekday >= 6 && weekendPreference == 0) {
+            continue; // Skip to next day
+          }
+
+          // Don't schedule in the past
+          if (sessionDate.isBefore(now.subtract(const Duration(hours: 1)))) {
             continue;
           }
 
@@ -189,6 +197,12 @@ class StudyScheduleOptimizer {
 
       // Sort by start time
       studyBlocks.sort((a, b) => a.startTime.compareTo(b.startTime));
+
+      // Debug logging
+      print('📅 Generated ${studyBlocks.length} study blocks for ${assignments.length} assignments');
+      if (studyBlocks.isEmpty && assignments.isNotEmpty) {
+        print('⚠️ No blocks generated! Assignments: ${assignments.map((a) => '${a.title} (due in ${a.daysUntilDue} days)').join(", ")}');
+      }
 
       // Save to Firestore
       await _saveStudyBlocks(userId, studyBlocks);
