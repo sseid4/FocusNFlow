@@ -22,17 +22,23 @@ class ChatMessage {
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
+    DateTime parseTimestamp(dynamic ts) {
+      if (ts == null) return DateTime.now();
+      if (ts is String) return DateTime.tryParse(ts) ?? DateTime.now();
+      return DateTime.now();
+    }
+
     return ChatMessage(
-      id: json['id'] as String,
-      groupId: json['groupId'] as String,
-      userId: json['userId'] as String,
-      senderName: json['senderName'] as String,
-      content: json['content'] as String,
-      timestamp: DateTime.parse(json['timestamp'] as String),
+      id: json['id'] as String? ?? '',               // default empty string
+      groupId: json['groupId'] as String? ?? '',
+      userId: json['userId'] as String? ?? '',
+      senderName: json['senderName'] as String? ?? 'Anonymous',
+      content: json['content'] as String? ?? '',
+      timestamp: parseTimestamp(json['timestamp']),
       reactions: Map<String, int>.from(json['reactions'] ?? {}),
       isEdited: json['isEdited'] as bool? ?? false,
       editedAt: json['editedAt'] != null
-          ? DateTime.parse(json['editedAt'] as String)
+          ? parseTimestamp(json['editedAt'])
           : null,
     );
   }
